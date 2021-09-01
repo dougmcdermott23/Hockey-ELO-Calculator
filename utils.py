@@ -15,6 +15,7 @@ POSTSEASON_GAME_TYPE = 3
 
 start_year = 2019
 standard_rating = 1500
+carry_over = 2/3
 valid_game_types = [SEASON_GAME_TYPE]
 
 # Used to store team ratings when initializing data for loading
@@ -83,6 +84,8 @@ def LoadGameData(all_game_data):
     global valid_teams
     valid_teams = db.GetTeamNameInformation()
 
+    current_season = min(all_game_data)
+
     for season, games in all_game_data.items():
         for index in range(len(games)):
             game = Game(
@@ -97,13 +100,26 @@ def LoadGameData(all_game_data):
                 games['status'][index]
                 )
 
-            if IsGameValid(game):
-                game.CalculateELO(team_ratings[game.home_team], team_ratings[game.away_team])
-                team_ratings[game.home_team], team_ratings[game.away_team] = game.home_end_rating, game.away_end_rating
-                list_of_valid_games.append(game.GetGameInformation())
+            if (season != current_season):
+                RecalculateRatingsOnNewSeason()
+                current_season = season
+
+            game_information = InitializeGameData(game)
+            if game_information != None:
+                list_of_valid_games.append(game_information)
     
     db.LoadGameData(list_of_valid_games)
     db.UpdateTeamRatings(team_ratings)
+
+def RecalculateRatingsOnNewSeason():
+    for team, rating in team_ratings.items():
+        team_ratings[team] = (1 - carry_over) * standard_rating + (carry_over) * rating
+
+def InitializeGameData(game):
+    if IsGameValid(game):
+        game.CalculateELO(team_ratings[game.home_team], team_ratings[game.away_team])
+        team_ratings[game.home_team], team_ratings[game.away_team] = game.home_end_rating, game.away_end_rating
+        return game.GetGameInformation()
 
 def IsGameValid(game):
     return IsGameTypeValid(game) and AreTeamsValid(game)
@@ -113,64 +129,6 @@ def IsGameTypeValid(game):
 
 def AreTeamsValid(game):
     return (game.home_team in valid_teams and game.away_team in valid_teams)
-
-# def GenerateELO(historic_data):
-#     for season, games in historic_data.items():
-#         for game in range(len(games)):
-#             valid, home_team, away_team = ValidateGame(games['home_team'][game], games['away_team'][game])
-#             if (valid):
-#                 date = games['date'][game]
-#                 home_score = games['home_score'][game]
-#                 away_score = games['away_score'][game]
-#                 CalculateELO(home_team, away_team, season, date, game, home_score, away_score)
-
-#         # Adjust team elo's after the season is over
-#         RecalculateOnSeasonOver(season + 1)
-
-#     PlotTeamHistory('TOR')
-
-#     return
-
-# def CalculateELO(home_team, away_team, season, date, game_number, home_score, away_score):
-#     K = 20
-#     R_home = team_ratings[home_team]['elo'][-1]
-#     R_away = team_ratings[away_team]['elo'][-1]
-#     S_home = 0
-#     S_away = 0
-
-#     if home_score > away_score:
-#         S_home = 1
-
-#     S_away = 1 - S_home
-
-#     # Expected Score
-#     Q_home = math.pow(10, R_home/400)
-#     Q_away = math.pow(10, R_away/400)
-#     E_home = Q_home / (Q_home + Q_away)
-#     E_away = Q_away / (Q_home + Q_away)
-
-#     # Updated Rating
-#     R_home_new = R_home + K * (S_home - E_home)
-#     R_away_new = R_away + K * (S_away - E_away)
-
-#     # Store new Team Rating
-#     StoreTeamInformation(home_team, season, date, game_number, R_home_new)
-#     StoreTeamInformation(away_team, season, date, game_number, R_away_new)
-#     return
-
-# def RecalculateOnSeasonOver(new_season):
-#     carry_over = 2/3
-    
-#     for team in team_ratings:
-#         new_elo = (1 - carry_over) * standard_rating + (carry_over) * team_ratings[team]['elo'][-1]
-#         StoreTeamInformation(team, new_season, '{}-09-30'.format(new_season), None, new_elo)
-
-# def StoreTeamInformation(team, season, date, game_number, elo):
-#     team_ratings[team]['season'].append(season)
-#     team_ratings[team]['date'].append(date)
-#     team_ratings[team]['game_number'].append(game_number)
-#     team_ratings[team]['elo'].append(elo)
-#     return
 
 # def PlotTeamHistory(team):
 #     years = mdates.YearLocator()
