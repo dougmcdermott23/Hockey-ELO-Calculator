@@ -1,15 +1,9 @@
+import sys
+
 import utils
 
-import pickle
-import numpy as np
+def main(argv):
+    utils.InitializeDatabase()
 
-import sys
-import pdb
-
-try:
-    historic_data = pickle.load(open("historic_data.pickle", "rb"))
-except (OSError, IOError) as e:
-    historic_data = utils.SeasonScraper()
-    pickle.dump(historic_data, open("historic_data.pickle", "wb"))
-
-utils.GenerateELO(historic_data)
+if __name__ == "__main__":
+    main(sys.argv)
