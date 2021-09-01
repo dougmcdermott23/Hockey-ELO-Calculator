@@ -9,9 +9,15 @@ import numpy as np
 import dbutils as db
 from game import Game
 
+PRESEASON_GAME_TYPE = 1
+SEASON_GAME_TYPE = 2
+POSTSEASON_GAME_TYPE = 3
+
 start_year = 2019
 standard_rating = 1500
+valid_game_types = [SEASON_GAME_TYPE]
 
+# Used to store team ratings when initializing data for loading
 team_ratings = {
     'ANA': standard_rating,
     'ARI': standard_rating,
@@ -74,7 +80,8 @@ def SeasonScraper():
 def LoadGameData(all_game_data):
     list_of_valid_games = []
 
-    team_name_information = db.GetTeamNameInformation()
+    global valid_teams
+    valid_teams = db.GetTeamNameInformation()
 
     for season, games in all_game_data.items():
         for index in range(len(games)):
@@ -90,13 +97,22 @@ def LoadGameData(all_game_data):
                 games['status'][index]
                 )
 
-            if game.AreTeamsValid(team_name_information):
+            if IsGameValid(game):
                 game.CalculateELO(team_ratings[game.home_team], team_ratings[game.away_team])
                 team_ratings[game.home_team], team_ratings[game.away_team] = game.home_end_rating, game.away_end_rating
                 list_of_valid_games.append(game.GetGameInformation())
     
     db.LoadGameData(list_of_valid_games)
     db.UpdateTeamRatings(team_ratings)
+
+def IsGameValid(game):
+    return IsGameTypeValid(game) and AreTeamsValid(game)
+
+def IsGameTypeValid(game):
+    return game.game_type in valid_game_types
+
+def AreTeamsValid(game):
+    return (game.home_team in valid_teams and game.away_team in valid_teams)
 
 # def GenerateELO(historic_data):
 #     for season, games in historic_data.items():

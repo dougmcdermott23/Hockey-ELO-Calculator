@@ -29,11 +29,11 @@ INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Anaheim Ducks', 'A
 INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Arizona Coyotes', 'ARI');
 INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Boston Bruins', 'BOS');
 INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Buffalo Sabres', 'BUF');
-INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Calgary Flames', 'CAR');
-INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Carolina Hurricanes', 'CBJ');
-INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Chicago Blackhawks', 'CGY');
-INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Colorado Avalanche', 'CHI');
-INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Columbus Blue Jackets', 'COL');
+INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Calgary Flames', 'CGY');
+INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Carolina Hurricanes', 'CAR');
+INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Chicago Blackhawks', 'CHI');
+INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Colorado Avalanche', 'COL');
+INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Columbus Blue Jackets', 'CBJ');
 INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Dallas Stars', 'DAL');
 INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Detroit Red Wings', 'DET');
 INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Edmonton Oilers', 'EDM');
@@ -41,8 +41,8 @@ INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Florida Panthers',
 INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Los Angeles Kings', 'L.A');
 INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Minnesota Wild', 'MIN');
 INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Montreal Canadiens', 'MTL');
-INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Nashville Predators', 'N.J');
-INSERT INTO team (team_name, team_name_abbreviation) VALUES ('New Jersey Devils', 'NSH');
+INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Nashville Predators', 'NSH');
+INSERT INTO team (team_name, team_name_abbreviation) VALUES ('New Jersey Devils', 'N.J');
 INSERT INTO team (team_name, team_name_abbreviation) VALUES ('New York Islanders', 'NYI');
 INSERT INTO team (team_name, team_name_abbreviation) VALUES ('New York Rangers', 'NYR');
 INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Ottawa Senators', 'OTT');
@@ -55,5 +55,5 @@ INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Tampa Bay Lightnin
 INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Toronto Maple Leafs', 'TOR');
 INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Vancouver Canucks', 'VAN');
 INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Vegas Golden Knights', 'VGK');
-INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Washington Capitals', 'WPG');
-INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Winnipeg Jets', 'WSH');
+INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Washington Capitals', 'WSH');
+INSERT INTO team (team_name, team_name_abbreviation) VALUES ('Winnipeg Jets', 'WPG');

@@ -55,9 +55,6 @@ class Game:
         self.game_type = int(game_str[4:6])
         self.game_number = int(game_str[6:])
 
-    def AreTeamsValid(self, valid_teams):
-        return (self.home_team in valid_teams and self.away_team in valid_teams)
-
     def GetGameInformation(self):
         game_information = [
             self.season_id,
