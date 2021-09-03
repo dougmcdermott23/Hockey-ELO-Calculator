@@ -26,6 +26,13 @@ def GetTeamNameInformation():
         dict[team[0]] = team[1]
     return dict
 
+def GetTeamRatings():
+    dict = {}
+    team_ratings = ExecuteAndFetchAll(f"SELECT team_name_abbreviation, current_rating FROM team ORDER BY team_name_abbreviation")
+    for team in team_ratings:
+        dict[team[0]] = team[1]
+    return dict
+
 def IsTeamValid(abbreviation):
     result = ExecuteAndFetchAll(f"SELECT 1 FROM team WHERE team_name_abbreviation = '{abbreviation}'")
     return result != None
@@ -42,6 +49,23 @@ def LoadGameData(game_data):
             cur.executemany(command, game_data)
         
         conn.commit()
+        
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
+
+def InitializeTeamRatings(rating):
+    conn = None
+    try:
+        params = Config()
+        conn = psycopg2.connect(**params)
+
+        with conn.cursor() as cur:
+            command = f'UPDATE team SET current_rating = {rating}'
+            cur.execute(command)
+            conn.commit()
         
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
@@ -69,14 +93,14 @@ def UpdateTeamRatings(team_ratings):
         if conn is not None:
             conn.close()
 
-def InitializeDatabase():
+def InitializeDatabaseSchema():
     conn = None
     try:
         params = Config()
         conn = psycopg2.connect(**params)
 
         with conn.cursor() as cur:
-            sql_file = open("schema.sql", "r")
+            sql_file = open('schema.sql', 'r')
             cur.execute(sql_file.read())
 
         conn.commit()

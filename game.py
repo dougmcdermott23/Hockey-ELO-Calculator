@@ -1,23 +1,6 @@
 import math
 
 class Game:
-    game_id = None
-    season_id = None
-    game_type = None
-    game_number = None
-    date = None
-    start_time = None
-    venue = None
-    home_team = None
-    away_team = None
-    home_score = None
-    away_score = None
-    status = None
-    home_start_rating = None
-    home_end_rating = None
-    away_start_rating = None
-    away_end_rating = None
-
     def __init__(self, game_id, date, start_time, venue, home_team, away_team, home_score, away_score, status):
         self.game_id = game_id
         self.date = date
@@ -32,8 +15,6 @@ class Game:
         self.ValidateTeamName()
         self.ParseGameId()
 
-        return
-
     def ValidateTeamName(self):
         if self.home_team == 'PHX':
             self.home_team = 'ARI'
@@ -46,8 +27,6 @@ class Game:
 
         if self.away_team == 'ATL':
             self.away_team = 'WPG'
-
-        return
 
     def ParseGameId(self):
         game_str = str(self.game_id)
@@ -76,8 +55,7 @@ class Game:
 
         return game_information
 
-    def CalculateELO(self, home_start_rating, away_start_rating):
-        K = 20
+    def CalculateELO(self, home_start_rating, away_start_rating, K=20):
         R_home = home_start_rating
         R_away = away_start_rating
         S_home = 0
@@ -102,5 +80,3 @@ class Game:
         self.home_end_rating = R_home_new
         self.away_start_rating = away_start_rating
         self.away_end_rating = R_away_new
-
-        return

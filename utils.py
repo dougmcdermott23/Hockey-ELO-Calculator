@@ -1,134 +1,39 @@
 import datetime as dt
 import hockey_scraper
 import math
-from hockey_scraper.utils.shared import season_end_bound
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import numpy as np
 
+import constants
 import dbutils as db
-from game import Game
-
-PRESEASON_GAME_TYPE = 1
-SEASON_GAME_TYPE = 2
-POSTSEASON_GAME_TYPE = 3
-
-start_year = 2019
-standard_rating = 1500
-carry_over = 2/3
-valid_game_types = [SEASON_GAME_TYPE]
-
-# Used to store team ratings when initializing data for loading
-team_ratings = {
-    'ANA': standard_rating,
-    'ARI': standard_rating,
-    'BOS': standard_rating,
-    'BUF': standard_rating,
-    'CAR': standard_rating,
-    'CBJ': standard_rating,
-    'CGY': standard_rating,
-    'CHI': standard_rating,
-    'COL': standard_rating,
-    'DAL': standard_rating,
-    'DET': standard_rating,
-    'EDM': standard_rating,
-    'FLA': standard_rating,
-    'L.A': standard_rating,
-    'MIN': standard_rating,
-    'MTL': standard_rating,
-    'N.J': standard_rating,
-    'NSH': standard_rating,
-    'NYI': standard_rating,
-    'NYR': standard_rating,
-    'OTT': standard_rating,
-    'PHI': standard_rating,
-    'PIT': standard_rating,
-    'S.J': standard_rating,
-    'SEA': standard_rating,
-    'STL': standard_rating,
-    'T.B': standard_rating,
-    'TOR': standard_rating,
-    'VAN': standard_rating,
-    'VGK': standard_rating,
-    'WPG': standard_rating,
-    'WSH': standard_rating
-}
+from config import Config
+from etlmanager import ETLManager
 
 def InitializeDatabase():
-    db.InitializeDatabase()
+    params = Config(section='default_values')
 
-    game_data = SeasonScraper()
-    LoadGameData(game_data)
+    db.InitializeDatabaseSchema()
+    db.InitializeTeamRatings(params['standard_rating'])
 
-# Load all game data from set starting date to current time
-def SeasonScraper():
+    InitializeGameData(params)
+
+# When initializing game data we assume that the data is retrieved in the correct order and all games are present
+def InitializeGameData(params):
+    start_year = int(params['start_year'])
     current_year = dt.datetime.now().year
 
-    seasons = {}
+    team_ratings = db.GetTeamRatings()
+    etl_manager = ETLManager(team_ratings)
 
-    for year in range (start_year, current_year):
-        retrieved = False
-        while retrieved is False:
-            try:
-                sched_df = hockey_scraper.scrape_schedule(f"{year}-08-01", f"{year + 1}-08-01")
-                seasons[year] = sched_df
-                retrieved = True
-            except:
-                print("Exception while retrieving data, trying again...")
+    for year in range(start_year, current_year):
+        etl_manager.ExtractTransformLoad(f'{year}-08-01', f'{year + 1}-08-01', retries_limit=100)
+        RecalculateRatingsOnNewSeason(team_ratings, float(params['standard_rating']), float(params['carry_over']))
 
-    return seasons
-
-def LoadGameData(all_game_data):
-    list_of_valid_games = []
-
-    global valid_teams
-    valid_teams = db.GetTeamNameInformation()
-
-    current_season = min(all_game_data)
-
-    for season, games in all_game_data.items():
-        for index in range(len(games)):
-            game = Game(
-                games['game_id'][index],
-                games['date'][index],
-                games['start_time'][index],
-                games['venue'][index],
-                games['home_team'][index],
-                games['away_team'][index],
-                games['home_score'][index],
-                games['away_score'][index],
-                games['status'][index]
-                )
-
-            if (season != current_season):
-                RecalculateRatingsOnNewSeason()
-                current_season = season
-
-            game_information = InitializeGameData(game)
-            if game_information != None:
-                list_of_valid_games.append(game_information)
-    
-    db.LoadGameData(list_of_valid_games)
-    db.UpdateTeamRatings(team_ratings)
-
-def RecalculateRatingsOnNewSeason():
+def RecalculateRatingsOnNewSeason(team_ratings, standard_rating=1500, carry_over=2/3):
     for team, rating in team_ratings.items():
         team_ratings[team] = (1 - carry_over) * standard_rating + (carry_over) * rating
-
-def InitializeGameData(game):
-    if IsGameValid(game):
-        game.CalculateELO(team_ratings[game.home_team], team_ratings[game.away_team])
-        team_ratings[game.home_team], team_ratings[game.away_team] = game.home_end_rating, game.away_end_rating
-        return game.GetGameInformation()
-
-def IsGameValid(game):
-    return IsGameTypeValid(game) and AreTeamsValid(game)
-
-def IsGameTypeValid(game):
-    return game.game_type in valid_game_types
-
-def AreTeamsValid(game):
-    return (game.home_team in valid_teams and game.away_team in valid_teams)
+    db.UpdateTeamRatings(team_ratings)
 
 # def PlotTeamHistory(team):
 #     years = mdates.YearLocator()
