@@ -16,7 +16,11 @@ CREATE TABLE IF NOT EXISTS game (
     away_rating_start FLOAT,
     away_rating_end FLOAT
 );
-ALTER TABLE game ADD CONSTRAINT unique_game UNIQUE (season_id, game_type, game_number);
+
+CREATE TABLE IF NOT EXISTS season_update (
+    season_update_id INT NOT NULL PRIMARY KEY,
+    update_date DATE NOT NULL
+);
 
 CREATE TABLE IF NOT EXISTS team (
     team_id BIGSERIAL NOT NULL PRIMARY KEY,
@@ -24,8 +28,11 @@ CREATE TABLE IF NOT EXISTS team (
     team_name_abbreviation VARCHAR(50) NOT NULL,
     current_rating FLOAT NOT NULL
 );
+
+ALTER TABLE game ADD CONSTRAINT unique_game UNIQUE (season_id, game_type, game_number);
 ALTER TABLE team ADD CONSTRAINT unique_team_name UNIQUE (team_name);
 ALTER TABLE team ADD CONSTRAINT unique_team_name_abbreviation UNIQUE (team_name_abbreviation);
+
 INSERT INTO team (team_name, team_name_abbreviation, current_rating) VALUES ('Anaheim Ducks', 'ANA', 0);
 INSERT INTO team (team_name, team_name_abbreviation, current_rating) VALUES ('Arizona Coyotes', 'ARI', 0);
 INSERT INTO team (team_name, team_name_abbreviation, current_rating) VALUES ('Boston Bruins', 'BOS', 0);
@@ -58,3 +65,8 @@ INSERT INTO team (team_name, team_name_abbreviation, current_rating) VALUES ('Va
 INSERT INTO team (team_name, team_name_abbreviation, current_rating) VALUES ('Vegas Golden Knights', 'VGK', 0);
 INSERT INTO team (team_name, team_name_abbreviation, current_rating) VALUES ('Washington Capitals', 'WSH', 0);
 INSERT INTO team (team_name, team_name_abbreviation, current_rating) VALUES ('Winnipeg Jets', 'WPG', 0);
+
+CREATE TABLE IF NOT EXISTS season_update (
+    season_update_id INT NOT NULL PRIMARY KEY,
+    update_date DATE NOT NULL
+);

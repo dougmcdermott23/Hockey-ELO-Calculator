@@ -19,6 +19,24 @@ def ExecuteAndFetchAll(command):
             conn.close()
     return result
 
+def ExecuteAndFetchOne(command):
+    result = None
+    conn = None
+    try:
+        params = Config()
+        conn = psycopg2.connect(**params)
+        
+        with conn.cursor() as cur:
+            cur.execute(command)
+            result = cur.fetchone()
+        
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
+    return result
+
 def GetTeamNameInformation():
     dict = {}
     teams = ExecuteAndFetchAll(f"SELECT team_name_abbreviation, team_name FROM team ORDER BY team_name_abbreviation")
@@ -35,9 +53,38 @@ def GetTeamRatings():
 
 def IsTeamValid(abbreviation):
     result = ExecuteAndFetchAll(f"SELECT 1 FROM team WHERE team_name_abbreviation = '{abbreviation}'")
-    return result != None
+    return result is not None
+
+def HasSeasonUpdateOccurred(season_update_id):
+    result = ExecuteAndFetchAll(f"SELECT 1 FROM season_update WHERE season_update_id = '{season_update_id}'")
+    return result is not None
+
+def InsertSeasonUpdateEntry(season_update_id, update_date):
+    conn = None
+    try:
+        params = Config()
+        conn = psycopg2.connect(**params)
+
+        with conn.cursor() as cur:
+            command = f'''INSERT INTO season_update (season_update_id, update_date)
+                            VALUES (%s, %s)'''
+            cur.execute(command, (season_update_id, update_date))
+            conn.commit()
+        
+    except (Exception, psycopg2.DatabaseError) as error:
+        success = False
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
+
+def GetLastGameDate():
+    result = ExecuteAndFetchOne(f"Select MAX(game_date) FROM game")
+    return result
 
 def LoadGameData(game_data):
+    success = True
+
     conn = None
     try:
         params = Config()
@@ -51,10 +98,13 @@ def LoadGameData(game_data):
         conn.commit()
         
     except (Exception, psycopg2.DatabaseError) as error:
+        success = False
         print(error)
     finally:
         if conn is not None:
             conn.close()
+
+    return success
 
 def InitializeTeamRatings(rating):
     conn = None
@@ -74,6 +124,8 @@ def InitializeTeamRatings(rating):
             conn.close()
 
 def UpdateTeamRatings(team_ratings):
+    success = True
+
     conn = None
     try:
         params = Config()
@@ -88,10 +140,13 @@ def UpdateTeamRatings(team_ratings):
                 conn.commit()
         
     except (Exception, psycopg2.DatabaseError) as error:
+        success = False
         print(error)
     finally:
         if conn is not None:
             conn.close()
+
+    return success
 
 def InitializeDatabaseSchema():
     conn = None

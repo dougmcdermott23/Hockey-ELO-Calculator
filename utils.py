@@ -1,39 +1,45 @@
-import datetime as dt
-import hockey_scraper
-import math
+from datetime import date
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import numpy as np
 
-import constants
 import dbutils as db
 from config import Config
 from etlmanager import ETLManager
 
 def InitializeDatabase():
-    params = Config(section='default_values')
+    params = Config(section='general')
 
     db.InitializeDatabaseSchema()
-    db.InitializeTeamRatings(params['standard_rating'])
+    db.InitializeTeamRatings(params['standard_rating']) # TO DO: need to add a check here to not overwrite information in the DB
 
     InitializeGameData(params)
 
 # When initializing game data we assume that the data is retrieved in the correct order and all games are present
 def InitializeGameData(params):
     start_year = int(params['start_year'])
-    current_year = dt.datetime.now().year
+    if params['simulate']:
+        current_year = int(params['simulate_current_year'])
+    else:
+        current_year = date.datetime.now().year
 
     team_ratings = db.GetTeamRatings()
     etl_manager = ETLManager(team_ratings)
 
     for year in range(start_year, current_year):
         etl_manager.ExtractTransformLoad(f'{year}-08-01', f'{year + 1}-08-01', retries_limit=100)
-        RecalculateRatingsOnNewSeason(team_ratings, float(params['standard_rating']), float(params['carry_over']))
+        UpdateRatingsOnNewSeason(year, team_ratings, float(params['standard_rating']), float(params['carry_over']))
 
-def RecalculateRatingsOnNewSeason(team_ratings, standard_rating=1500, carry_over=2/3):
+def UpdateRatingsOnNewSeason(season_update_id, team_ratings, standard_rating=1500, carry_over=2/3):
+    RecalculateRatingsOnNewSeason(team_ratings, standard_rating, carry_over)
+    
+    if db.UpdateTeamRatings(team_ratings):
+        current_date = date.today().strftime('%Y-%m-%d')
+        db.InsertSeasonUpdateEntry(season_update_id, current_date)
+
+def RecalculateRatingsOnNewSeason(team_ratings, standard_rating, carry_over):
     for team, rating in team_ratings.items():
         team_ratings[team] = (1 - carry_over) * standard_rating + (carry_over) * rating
-    db.UpdateTeamRatings(team_ratings)
 
 # def PlotTeamHistory(team):
 #     years = mdates.YearLocator()

@@ -5,19 +5,24 @@ import dbutils as db
 from game import Game
 
 class ETLManager:
-    def __init__(self, team_ratings):
+    def __init__(self, team_ratings=None):
+        if team_ratings is None:
+            team_ratings = db.GetTeamRatings()
         self.team_ratings = team_ratings
         return
 
     def ExtractTransformLoad(self, start_date, end_date, retries_limit=10):
+        success = False
+        
         try:
             raw_game_data = self.ExtractGameData(start_date, end_date, retries_limit)
-            transformed_game_data = self.TransformGameData(raw_game_data)
-            self.LoadGameData(transformed_game_data)
+            if raw_game_data is not None:
+                transformed_game_data = self.TransformGameData(raw_game_data)
+                success = self.LoadGameData(transformed_game_data)
         except Exception as error:
             print(f"Exception in ExtractTransformLoad... {error}")
-            return False
-        return True
+
+        return success
 
     def ExtractGameData(self, start_date, end_date, retries_limit=10):
         retrieved = False
@@ -57,8 +62,10 @@ class ETLManager:
         return transformed_game_data
 
     def LoadGameData(self, game_data):
-        db.LoadGameData(game_data)
-        db.UpdateTeamRatings(self.team_ratings)
+        print(f"[ETLManager] Loading {len(game_data)} games")
+        success = db.UpdateTeamRatings(self.team_ratings)
+        success &= db.LoadGameData(game_data)
+        return success
 
     def InitializeGameData(self, game):
         if self.IsGameValid(game):
