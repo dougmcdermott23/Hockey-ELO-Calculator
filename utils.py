@@ -10,7 +10,7 @@ from etlmanager import ETLManager
 def InitializeDatabase():
     params = Config(section='general')
     if db.InitializeDatabaseSchema():
-        db.InitializeTeamRatings(params['standard_rating'])
+        db.InitializeTeamRatings(float(params['standard_rating']))
         InitializeGameData(params)
 
 # When initializing game data we assume that the data is retrieved in the correct order and all games are present
