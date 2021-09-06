@@ -54,7 +54,7 @@ def CheckSeasonEndUpdate(current_date):
             print("[UpdateScheduler] Recalculating ratings on season end")
             team_ratings = db.GetTeamRatings()
             params = Config(section='general')
-            UpdateRatingsOnNewSeason(current_year, team_ratings, params['standard_rating'], params['carry_over'])
+            UpdateRatingsOnNewSeason(current_year, team_ratings, float(params['standard_rating']), float(params['carry_over']))
 
 # SIMULATE: Used to initialize the values for simulation
 def InitializeSimulate(simulate_current_year):
@@ -62,7 +62,7 @@ def InitializeSimulate(simulate_current_year):
     global current_date
 
     last_update_date = GetLastUpdateDay()
-    current_date = simulate_current_year + '-07-30'
+    current_date = simulate_current_year + '-09-25'
     if last_update_date > current_date:
         current_date = (db.GetLastGameDate()[0] + timedelta(days=2)).strftime('%Y-%m-%d')
 

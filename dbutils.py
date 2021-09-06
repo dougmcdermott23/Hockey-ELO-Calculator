@@ -53,11 +53,11 @@ def GetTeamRatings():
 
 def IsTeamValid(abbreviation):
     result = ExecuteAndFetchAll(f"SELECT 1 FROM team WHERE team_name_abbreviation = '{abbreviation}'")
-    return result is not None
+    return result is not None and len(result) > 0
 
 def HasSeasonUpdateOccurred(season_update_id):
     result = ExecuteAndFetchAll(f"SELECT 1 FROM season_update WHERE season_update_id = '{season_update_id}'")
-    return result is not None
+    return result is not None and len(result) > 0
 
 def InsertSeasonUpdateEntry(season_update_id, update_date):
     conn = None
@@ -149,6 +149,8 @@ def UpdateTeamRatings(team_ratings):
     return success
 
 def InitializeDatabaseSchema():
+    success = True
+
     conn = None
     try:
         params = Config()
@@ -161,7 +163,10 @@ def InitializeDatabaseSchema():
         conn.commit()
 
     except (Exception, psycopg2.DatabaseError) as error:
+        success = False
         print(error)
     finally:
         if conn is not None:
             conn.close()
+
+    return success

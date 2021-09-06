@@ -9,11 +9,9 @@ from etlmanager import ETLManager
 
 def InitializeDatabase():
     params = Config(section='general')
-
-    db.InitializeDatabaseSchema()
-    db.InitializeTeamRatings(params['standard_rating']) # TO DO: need to add a check here to not overwrite information in the DB
-
-    InitializeGameData(params)
+    if db.InitializeDatabaseSchema():
+        db.InitializeTeamRatings(params['standard_rating'])
+        InitializeGameData(params)
 
 # When initializing game data we assume that the data is retrieved in the correct order and all games are present
 def InitializeGameData(params):
