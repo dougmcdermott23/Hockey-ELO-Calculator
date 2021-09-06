@@ -3,13 +3,14 @@ import time
 import threading
 
 import utils
-from updatescheduler import InitializeDailyGameDataUpdateScheduler
+from updatescheduler import UpdateScheduler
 
 def main(argv):
     utils.InitializeDatabase()
 
     # Start an update thread
-    update_scheduler_thread = threading.Thread(target=InitializeDailyGameDataUpdateScheduler)
+    update_scheduler = UpdateScheduler()
+    update_scheduler_thread = threading.Thread(target=update_scheduler.CheckForPendingUpdates())
     update_scheduler_thread.start()
 
     ProcessMessages()
