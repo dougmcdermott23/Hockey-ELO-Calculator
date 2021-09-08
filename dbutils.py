@@ -156,7 +156,7 @@ def GetLastGameDate():
     result = ExecuteAndFetchOne(f"Select MAX(game_date) FROM game")
     return result[0] if result is not None else None
 
-def LoadGameData(game_data):
+def InsertGameData(game_data):
     command = '''INSERT INTO game (season_id, game_type, game_number, game_date, start_time, venue, home_team, away_team, home_score, away_score, game_status, home_rating_start, home_rating_end, away_rating_start, away_rating_end)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
     return ExecuteMany(command, game_data)
@@ -177,17 +177,17 @@ def GetAccountInformationFromAccountName(account_name):
     }
     return account_information
 
-def CreateNewAccount(account_information):
+def InsertAccount(account_information):
     command = '''INSERT INTO account (account_name, account_open_datetime, account_balance, account_email)
                     VALUES (%s, %s, %s, %s)'''
     return ExecuteOne(command, account_information)
 
-def AdjustAccountBalance(account_id, amount):
+def UpdateAccountBalance(account_id, amount):
     command = f"UPDATE account SET account_balance = account_balance - {amount} WHERE account_id = {account_id}"
     return ExecuteOne(command)
 
 # trade
-def CommitTrade(trade_information):
+def InsertTrade(trade_information):
     command = '''INSERT INTO trade (account_id, team_id, trade_quantity, trade_datetime)
                     VALUES (%s, %s, %s, %s)'''
     return ExecuteOne(command, trade_information)

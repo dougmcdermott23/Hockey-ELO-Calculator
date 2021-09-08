@@ -46,7 +46,7 @@ class Trade:
         retries = 0
 
         while not success and retries < retries_limit:
-            success = db.CommitTrade(trade_information)
+            success = db.InsertTrade(trade_information)
             retries += 1
 
         return success
@@ -56,7 +56,7 @@ class Trade:
         retries = 0
 
         while not success and retries < retries_limit:
-            success = db.AdjustAccountBalance(self.account.account_id, trade_value)
+            success = db.UpdateAccountBalance(self.account.account_id, trade_value)
             retries += 1
 
         return success

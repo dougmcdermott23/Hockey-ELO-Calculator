@@ -37,7 +37,7 @@ class Account:
 
         account_open_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         account_information = (account_name, account_open_datetime, account_balance, account_email)
-        db.CreateNewAccount(account_information)
+        db.InsertAccount(account_information)
 
         self.account_id = self.LoadAccountFromDB(account_name)
 
