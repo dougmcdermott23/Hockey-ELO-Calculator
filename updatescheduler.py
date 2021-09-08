@@ -37,7 +37,7 @@ class UpdateScheduler:
 
     # Get the most recent game date in DB and return as string
     def GetLastUpdateDay(self):
-        last_day = db.GetLastGameDate()[0] + timedelta(days=1)
+        last_day = db.GetLastGameDate() + timedelta(days=1)
         return last_day.strftime('%Y-%m-%d')
 
     # Check if season update has occurred. If it hasn't and it is time to update, recalculate team ratings and update
@@ -63,7 +63,7 @@ class UpdateScheduler:
         last_update_date = self.GetLastUpdateDay()
         self.simulate_current_date = simulate_current_year + '-09-25'
         if last_update_date > self.simulate_current_date:
-            current_date = (db.GetLastGameDate()[0] + timedelta(days=2)).strftime('%Y-%m-%d')
+            current_date = (db.GetLastGameDate() + timedelta(days=2)).strftime('%Y-%m-%d')
 
     # Extracts, transforms, and loads all game data from the previous update to now
     def SimulateUpdateDailyGameData(self):

@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS game (
     away_rating_start FLOAT,
     away_rating_end FLOAT
 );
+ALTER TABLE game ADD CONSTRAINT unique_game UNIQUE (season_id, game_type, game_number);
 
 CREATE TABLE IF NOT EXISTS season_update (
     season_update_id INT NOT NULL PRIMARY KEY,
@@ -28,10 +29,35 @@ CREATE TABLE IF NOT EXISTS team (
     team_name_abbreviation VARCHAR(50) NOT NULL,
     current_rating FLOAT NOT NULL
 );
-
-ALTER TABLE game ADD CONSTRAINT unique_game UNIQUE (season_id, game_type, game_number);
 ALTER TABLE team ADD CONSTRAINT unique_team_name UNIQUE (team_name);
 ALTER TABLE team ADD CONSTRAINT unique_team_name_abbreviation UNIQUE (team_name_abbreviation);
+
+CREATE TABLE IF NOT EXISTS account (
+    account_id BIGSERIAL NOT NULL PRIMARY KEY,
+    account_name VARCHAR(50) NOT NULL,
+    account_open_datetime TIMESTAMP NOT NULL,
+    account_balance FLOAT NOT NULL,
+    account_email VARCHAR(150)
+);
+ALTER TABLE account ADD CONSTRAINT account_name UNIQUE (account_name);
+ALTER TABLE account ADD CONSTRAINT unique_account_email UNIQUE (account_email);
+ALTER TABLE account ADD CONSTRAINT positive_account_balance CHECK (account_balance >= 0);
+
+CREATE TABLE IF NOT EXISTS trade (
+    trade_id BIGSERIAL NOT NULL PRIMARY KEY,
+    account_id INT NOT NULL,
+    team_id INT NOT NULL,
+    trade_quantity FLOAT NOT NULL,
+    trade_datetime TIMESTAMP NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS holding (
+    account_id INT NOT NULL,
+    team_id INT NOT NULL,
+    quantity FLOAT NOT NULL
+);
+ALTER TABLE holding ADD PRIMARY KEY (account_id, team_id);
+ALTER TABLE holding ADD CONSTRAINT positive_quantity CHECK (quantity >= 0);
 
 INSERT INTO team (team_name, team_name_abbreviation, current_rating) VALUES ('Anaheim Ducks', 'ANA', 0);
 INSERT INTO team (team_name, team_name_abbreviation, current_rating) VALUES ('Arizona Coyotes', 'ARI', 0);
