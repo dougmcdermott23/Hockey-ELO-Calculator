@@ -24,6 +24,7 @@ class ETLManager:
 
         return success
 
+    # Extract game data within date range
     def ExtractGameData(self, start_date, end_date, retries_limit=10):
         retrieved = False
         retries = 0
@@ -39,6 +40,7 @@ class ETLManager:
 
         return raw_game_data
 
+    # Takes raw game data, transforms the information with updated team ratings and stores in a list
     def TransformGameData(self, raw_game_data):
         transformed_game_data = []
         
@@ -61,10 +63,11 @@ class ETLManager:
         
         return transformed_game_data
 
+    # Update team ratings and insert transformed game data
     def LoadGameData(self, game_data):
         print(f"[ETLManager] Loading {len(game_data)} games")
         success = db.UpdateTeamRatings(self.team_ratings)
-        success &= db.LoadGameData(game_data)
+        success &= db.InsertGameData(game_data)
         return success
 
     def InitializeGameData(self, game):
@@ -72,7 +75,6 @@ class ETLManager:
             game.CalculateELO(self.team_ratings[game.home_team], self.team_ratings[game.away_team])
             self.team_ratings[game.home_team], self.team_ratings[game.away_team] = game.home_end_rating, game.away_end_rating
             return game.GetGameInformation()
-
     
     def IsGameValid(self, game):
         return self.IsGameTypeValid(game) and self.AreTeamsValid(game)

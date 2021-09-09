@@ -183,7 +183,7 @@ def InsertAccount(account_information):
     return ExecuteOne(command, account_information)
 
 def UpdateAccountBalance(account_id, amount):
-    command = f"UPDATE account SET account_balance = account_balance - {amount} WHERE account_id = {account_id}"
+    command = f"UPDATE account SET account_balance = account_balance + {amount} WHERE account_id = {account_id}"
     return ExecuteOne(command)
 
 # trade

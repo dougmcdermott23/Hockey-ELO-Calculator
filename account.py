@@ -4,6 +4,13 @@ from constants import ErrorCode
 import dbutils as db
 
 class Account:
+    account_id = None
+    account_name = None
+    account_open_datetime = None
+    account_balance = None
+    account_email = None
+    loaded = False
+
     def __init__(self):
         self.ResetAccountInformation()
 
@@ -15,7 +22,11 @@ class Account:
             self.account_email = None
             self.loaded = False
 
-    def LoadAccountFromDB(self, account_name):
+    # If account exists in database set class fields, else reset class fields to None
+    def LoadAccountFromDB(self, account_name=None):
+        if account_name is None:
+            account_name = self.account_name
+
         self.ResetAccountInformation()
 
         account_information = db.GetAccountInformationFromAccountName(account_name)
@@ -29,6 +40,7 @@ class Account:
         
         return self.account_id
 
+    # Create a new account if one does not already exist with that account name
     def CreateAccount(self, account_name, account_balance, account_email=''):
         account_id = self.LoadAccountFromDB(account_name)
         if account_id is not None:
@@ -40,5 +52,15 @@ class Account:
         db.InsertAccount(account_information)
 
         self.account_id = self.LoadAccountFromDB(account_name)
-
         return self.account_id, None
+
+    # Update account balance by an amount (new balance = current balance + amount)
+    def AdjustAccountBalance(self, amount, retries_limit=3):
+        success = False
+        retries = 0
+
+        while not success and retries < retries_limit:
+            success = db.UpdateAccountBalance(self.account.account_id, amount)
+            retries += 1
+
+        return success

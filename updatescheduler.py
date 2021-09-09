@@ -55,7 +55,7 @@ class UpdateScheduler:
                 UpdateRatingsOnNewSeason(current_year, team_ratings, float(params['standard_rating']), float(params['carry_over']))
 
     #########################################################
-    # SIMULATION
+    # SIMULATION METHODS BELOW
     #########################################################
 
     # Used to initialize the values for simulation

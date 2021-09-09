@@ -15,6 +15,7 @@ class Game:
         self.ValidateTeamName()
         self.ParseGameId()
 
+    # Adjust team abbreviations for franchise changes
     def ValidateTeamName(self):
         if self.home_team == 'PHX':
             self.home_team = 'ARI'
@@ -28,6 +29,7 @@ class Game:
         if self.away_team == 'ATL':
             self.away_team = 'WPG'
 
+    # Game ID is in format YYYYTTNNNNNN (Y - Season, T - Game Type, N - Game Number)
     def ParseGameId(self):
         game_str = str(self.game_id)
         self.season_id = int(game_str[0:4])
