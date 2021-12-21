@@ -7,13 +7,15 @@ import dbutils as db
 # TO DO: add a Team class to abstract away some of that information. Will be useful for report generation, etc.
 
 class Trade:
-    account = None
-    team_id = None
-    quantity = None
+    account_name: str
+    team_abbreviation: str
+    quantity: int
 
-    def __init__(self, account_name, team_abbreviation, quantity):
-        self.account = Account()
-        self.account.LoadAccountFromDB(account_name)
+    def __init__(self,
+                 account_name: str,
+                 team_abbreviation: str, 
+                 quantity: int) -> None:
+        self.account = Account(account_name=account_name)
         self.team_id = db.GetTeamIdFromTeamNameAbbreviation(team_abbreviation)
         self.quantity = quantity
 
@@ -42,7 +44,7 @@ class Trade:
         return True, None
 
     # Validate trade value and trade quantity does not break account balance and account holdings respectively
-    def IsTradeValid(self, trade_value):
+    def IsTradeValid(self, trade_value: float):
         if self.account.account_balance + trade_value < 0:
             return False, ErrorCode.ACCOUNT_BALANCE_NOT_VALID
         if self.quantity < 0 and abs(self.quantity) > db.GetAccountHoldingsForTeam(self.account.account_id, self.team_id):
@@ -50,7 +52,7 @@ class Trade:
         return True, None
 
     # Commit trade to database
-    def CommitTrade(self, trade_information, retries_limit=3):
+    def CommitTrade(self, trade_information: tuple(int, int, int, str), retries_limit: int=3) -> bool:
         success = False
         retries = 0
 

@@ -51,13 +51,13 @@ CREATE TABLE IF NOT EXISTS trade (
     trade_datetime TIMESTAMP NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS holding (
-    account_id INT NOT NULL,
-    team_id INT NOT NULL,
-    quantity FLOAT NOT NULL
-);
-ALTER TABLE holding ADD PRIMARY KEY (account_id, team_id);
-ALTER TABLE holding ADD CONSTRAINT positive_quantity CHECK (quantity >= 0);
+-- CREATE TABLE IF NOT EXISTS holding (
+--     account_id INT NOT NULL,
+--     team_id INT NOT NULL,
+--     quantity FLOAT NOT NULL
+-- );
+-- ALTER TABLE holding ADD PRIMARY KEY (account_id, team_id);
+-- ALTER TABLE holding ADD CONSTRAINT positive_quantity CHECK (quantity >= 0);
 
 INSERT INTO team (team_name, team_name_abbreviation, current_rating) VALUES ('Anaheim Ducks', 'ANA', 0);
 INSERT INTO team (team_name, team_name_abbreviation, current_rating) VALUES ('Arizona Coyotes', 'ARI', 0);
@@ -92,7 +92,5 @@ INSERT INTO team (team_name, team_name_abbreviation, current_rating) VALUES ('Ve
 INSERT INTO team (team_name, team_name_abbreviation, current_rating) VALUES ('Washington Capitals', 'WSH', 0);
 INSERT INTO team (team_name, team_name_abbreviation, current_rating) VALUES ('Winnipeg Jets', 'WPG', 0);
 
-CREATE TABLE IF NOT EXISTS season_update (
-    season_update_id INT NOT NULL PRIMARY KEY,
-    update_date DATE NOT NULL
-);
+-- FOR DEBUGGING ONLY
+-- DROP TABLE IF EXISTS account, game, holding, season_update, team, trade;

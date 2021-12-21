@@ -8,7 +8,7 @@ from utils import UpdateRatingsOnNewSeason
 import dbutils as db
 
 class UpdateScheduler:
-    def __init__(self):
+    def __init__(self) -> None:
         self.params = Config(section='general')
         if self.params['simulate']:
             schedule.every(int(self.params['simulate_update_game_date_interval'])).seconds.do(self.SimulateUpdateDailyGameData)
@@ -18,13 +18,13 @@ class UpdateScheduler:
             schedule.every().day.at('05:00').do(self.UpdateDailyGameData)
             self.run_pending_check_interval = int(self.params['run_pending_check_interval'])
 
-    def CheckForPendingUpdates(self):
+    def CheckForPendingUpdates(self) -> None:
         while True:
             schedule.run_pending()
             time.sleep(self.run_pending_check_interval)
 
     # Extracts, transforms, and loads all game data from the previous update to now
-    def UpdateDailyGameData(self):
+    def UpdateDailyGameData(self) -> None:
         print("[UpdateScheduler] Starting Daily Game Update")
         last_update_date = self.GetLastUpdateDay()
         current_date = date.today().strftime('%Y-%m-%d')
@@ -36,12 +36,12 @@ class UpdateScheduler:
         print("[UpdateScheduler] Finished Daily Game Update")
 
     # Get the most recent game date in DB and return as string
-    def GetLastUpdateDay(self):
+    def GetLastUpdateDay(self) -> str:
         last_day = db.GetLastGameDate() + timedelta(days=1)
         return last_day.strftime('%Y-%m-%d')
 
     # Check if season update has occurred. If it hasn't and it is time to update, recalculate team ratings and update
-    def CheckSeasonEndUpdate(self, current_date):
+    def CheckSeasonEndUpdate(self, current_date: str) -> None:
         params = Config(section='general')
         reset_month = int(params['season_reset_month'])
         current_month = datetime.strptime(current_date, '%Y-%m-%d').date().month
@@ -59,14 +59,14 @@ class UpdateScheduler:
     #########################################################
 
     # Used to initialize the values for simulation
-    def InitializeSimulate(self, simulate_current_year):
+    def InitializeSimulate(self, simulate_current_year: str) -> None:
         last_update_date = self.GetLastUpdateDay()
         self.simulate_current_date = simulate_current_year + '-09-25'
         if last_update_date > self.simulate_current_date:
             current_date = (db.GetLastGameDate() + timedelta(days=2)).strftime('%Y-%m-%d')
 
     # Extracts, transforms, and loads all game data from the previous update to now
-    def SimulateUpdateDailyGameData(self):
+    def SimulateUpdateDailyGameData(self) -> None:
         print("[UpdateScheduler] Starting Simulate Daily Game Update")
         last_update_date = self.GetLastUpdateDay()
 
@@ -78,6 +78,6 @@ class UpdateScheduler:
         print("[UpdateScheduler] Finished Simulate Daily Game Update")
 
     # Update the current date used for simulation
-    def UpdateTestingDates(self):
+    def UpdateTestingDates(self) -> None:
         next_day = datetime.strptime(self.simulate_current_date, '%Y-%m-%d') + timedelta(days=1)
         self.simulate_current_date = next_day.strftime('%Y-%m-%d')

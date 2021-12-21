@@ -4,8 +4,6 @@ class GameType(Enum):
     PRESEASON_GAME_TYPE = 1
     SEASON_GAME_TYPE = 2
     POSTSEASON_GAME_TYPE = 3
-    
-valid_game_types = [GameType.SEASON_GAME_TYPE]
 
 class ErrorCode(Enum):
     DB_LOAD_TRADE_ERROR = 1

@@ -4,26 +4,30 @@ from constants import ErrorCode
 import dbutils as db
 
 class Account:
-    account_id = None
-    account_name = None
-    account_open_datetime = None
-    account_balance = None
-    account_email = None
-    loaded = False
+    account_id: int
+    account_name: str
+    account_open_datetime: str
+    account_balance: float
+    account_email: str
+    loaded: bool 
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.ResetAccountInformation()
 
-    def ResetAccountInformation(self):
-            self.account_id = None
-            self.account_name = None
-            self.account_open_datetime = None
-            self.account_balance = None
-            self.account_email = None
-            self.loaded = False
+    def __init(self, account_name: str) -> None:
+        self.ResetAccountInformation()
+        self.LoadAccountFromDB(account_name)
+
+    def ResetAccountInformation(self) -> None:
+        self.account_id: int = None
+        self.account_name: str = None
+        self.account_open_datetime: str = None
+        self.account_balance: float = None
+        self.account_email: str = None
+        self.loaded: bool = False
 
     # If account exists in database set class fields, else reset class fields to None
-    def LoadAccountFromDB(self, account_name=None):
+    def LoadAccountFromDB(self, account_name: str=None) -> int:
         if account_name is None:
             account_name = self.account_name
 
@@ -41,7 +45,7 @@ class Account:
         return self.account_id
 
     # Create a new account if one does not already exist with that account name
-    def CreateAccount(self, account_name, account_balance, account_email=''):
+    def CreateAccount(self, account_name: str, account_balance: float, account_email: str=''):
         account_id = self.LoadAccountFromDB(account_name)
         if account_id is not None:
             print(f"[Account] Account with name {self.account_name} already exists")
@@ -55,7 +59,7 @@ class Account:
         return self.account_id, None
 
     # Update account balance by an amount (new balance = current balance + amount)
-    def AdjustAccountBalance(self, amount, retries_limit=3):
+    def AdjustAccountBalance(self, amount: float, retries_limit: int=3):
         success = False
         retries = 0
 

@@ -1,22 +1,48 @@
 import math
 
 class Game:
-    def __init__(self, game_id, date, start_time, venue, home_team, away_team, home_score, away_score, status):
+    game_id: str
+    season_id: int
+    game_type: int
+    game_number: int
+    date: str
+    start_time: str
+    venue: str
+    home_team: str
+    away_team: str
+    home_score: int
+    away_score: int
+    status: str
+    home_start_rating: float
+    home_end_rating: float
+    away_start_rating: float
+    away_end_rating: float
+
+    def __init__(self,
+                 game_id: int,
+                 date: str,
+                 start_time: str,
+                 venue: str,
+                 home_team: str,
+                 away_team: str,
+                 home_score: int,
+                 away_score: int,
+                 status: str) -> None:
         self.game_id = game_id
         self.date = date
         self.start_time = start_time.strftime('%Y-%m-%d %H:%M:%S')
         self.venue = venue
         self.home_team = home_team
         self.away_team = away_team
-        self.home_score = int(home_score)
-        self.away_score = int(away_score)
+        self.home_score = home_score
+        self.away_score = away_score
         self.status = status
 
         self.ValidateTeamName()
         self.ParseGameId()
 
     # Adjust team abbreviations for franchise changes
-    def ValidateTeamName(self):
+    def ValidateTeamName(self) -> None:
         if self.home_team == 'PHX':
             self.home_team = 'ARI'
 
@@ -30,13 +56,13 @@ class Game:
             self.away_team = 'WPG'
 
     # Game ID is in format YYYYTTNNNNNN (Y - Season, T - Game Type, N - Game Number)
-    def ParseGameId(self):
+    def ParseGameId(self) -> None:
         game_str = str(self.game_id)
         self.season_id = int(game_str[0:4])
         self.game_type = int(game_str[4:6])
         self.game_number = int(game_str[6:])
 
-    def GetGameInformation(self):
+    def GetGameInformation(self) -> list:
         game_information = [
             self.season_id,
             self.game_type,
@@ -57,7 +83,7 @@ class Game:
 
         return game_information
 
-    def CalculateELO(self, home_start_rating, away_start_rating, K=20):
+    def CalculateELO(self, home_start_rating: float, away_start_rating: float, K: float=20) -> None:
         R_home = home_start_rating
         R_away = away_start_rating
         S_home = 0
