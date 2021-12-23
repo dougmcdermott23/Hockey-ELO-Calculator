@@ -30,7 +30,7 @@ class Game:
                  status: str) -> None:
         self.game_id = game_id
         self.date = date
-        self.start_time = start_time.strftime('%Y-%m-%d %H:%M:%S')
+        self.start_time = start_time.strftime("%Y-%m-%d %H:%M:%S")
         self.venue = venue
         self.home_team = home_team
         self.away_team = away_team
@@ -38,31 +38,31 @@ class Game:
         self.away_score = away_score
         self.status = status
 
-        self.ValidateTeamName()
-        self.ParseGameId()
+        self.validate_team_name()
+        self.parse_game_id()
 
     # Adjust team abbreviations for franchise changes
-    def ValidateTeamName(self) -> None:
-        if self.home_team == 'PHX':
-            self.home_team = 'ARI'
+    def validate_team_name(self) -> None:
+        if self.home_team == "PHX":
+            self.home_team = "ARI"
 
-        if self.away_team == 'PHX':
-            self.away_team = 'ARI'
+        if self.away_team == "PHX":
+            self.away_team = "ARI"
 
-        if self.home_team == 'ATL':
-            self.home_team = 'WPG'
+        if self.home_team == "ATL":
+            self.home_team = "WPG"
 
-        if self.away_team == 'ATL':
-            self.away_team = 'WPG'
+        if self.away_team == "ATL":
+            self.away_team = "WPG"
 
     # Game ID is in format YYYYTTNNNNNN (Y - Season, T - Game Type, N - Game Number)
-    def ParseGameId(self) -> None:
+    def parse_game_id(self) -> None:
         game_str = str(self.game_id)
         self.season_id = int(game_str[0:4])
         self.game_type = int(game_str[4:6])
         self.game_number = int(game_str[6:])
 
-    def GetGameInformation(self) -> list:
+    def get_game_information(self) -> list:
         game_information = [
             self.season_id,
             self.game_type,
@@ -83,7 +83,7 @@ class Game:
 
         return game_information
 
-    def CalculateELO(self, home_start_rating: float, away_start_rating: float, K: float=20) -> None:
+    def calculate_elo(self, home_start_rating: float, away_start_rating: float, K: float=20) -> None:
         R_home = home_start_rating
         R_away = away_start_rating
         S_home = 0

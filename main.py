@@ -2,26 +2,26 @@ import sys
 import time
 import threading
 
-import utils
 from updatescheduler import UpdateScheduler
+from utils import initialize_database
 
 def main(argv) -> None:
-    utils.InitializeDatabase()
+    initialize_database()
 
     # Start an update thread
     update_scheduler = UpdateScheduler()
-    update_scheduler_thread = threading.Thread(target=update_scheduler.CheckForPendingUpdates)
+    update_scheduler_thread = threading.Thread(target=update_scheduler.check_for_pending_updates)
     update_scheduler_thread.start()
 
-    ProcessInput()
+    process_input()
 
-def ProcessInput() -> None:
+def process_input() -> None:
     while True:
         val = input("Enter 1 to access accounts, enter 2 to create a trade: ")
 
-        if val == '1':
+        if val == "1":
             print("Accounts")
-        if val == '2':
+        if val == "2":
             print("Trades")
 
 if __name__ == '__main__':

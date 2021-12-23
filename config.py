@@ -1,6 +1,6 @@
 from configparser import ConfigParser
 
-def Config(file_name: str='config.ini', section: str='database') -> dict:
+def config(file_name: str="config.ini", section: str="database") -> dict:
     parser = ConfigParser()
     parser.read(file_name)
 

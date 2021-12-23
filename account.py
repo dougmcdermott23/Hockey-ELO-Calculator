@@ -12,13 +12,13 @@ class Account:
     loaded: bool 
 
     def __init__(self) -> None:
-        self.ResetAccountInformation()
+        self.reset_account_information()
 
     def __init(self, account_name: str) -> None:
-        self.ResetAccountInformation()
-        self.LoadAccountFromDB(account_name)
+        self.reset_account_information()
+        self.load_account_from_db(account_name)
 
-    def ResetAccountInformation(self) -> None:
+    def reset_account_information(self) -> None:
         self.account_id: int = None
         self.account_name: str = None
         self.account_open_datetime: str = None
@@ -27,13 +27,13 @@ class Account:
         self.loaded: bool = False
 
     # If account exists in database set class fields, else reset class fields to None
-    def LoadAccountFromDB(self, account_name: str=None) -> int:
+    def load_account_from_db(self, account_name: str=None) -> int:
         if account_name is None:
             account_name = self.account_name
 
-        self.ResetAccountInformation()
+        self.reset_account_information()
 
-        account_information = db.GetAccountInformationFromAccountName(account_name)
+        account_information = db.get_account_information_from_account_name(account_name)
         if account_information is not None:
             self.account_id = account_information['account_id']
             self.account_name = account_information['account_name']
@@ -45,26 +45,26 @@ class Account:
         return self.account_id
 
     # Create a new account if one does not already exist with that account name
-    def CreateAccount(self, account_name: str, account_balance: float, account_email: str=''):
-        account_id = self.LoadAccountFromDB(account_name)
+    def create_account(self, account_name: str, account_balance: float, account_email: str=""):
+        account_id = self.load_account_from_db(account_name)
         if account_id is not None:
             print(f"[Account] Account with name {self.account_name} already exists")
             return self.account_id, ErrorCode.ACCOUNT_ALREADY_EXISTS
 
-        account_open_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        account_open_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         account_information = (account_name, account_open_datetime, account_balance, account_email)
-        db.InsertAccount(account_information)
+        db.insert_account(account_information)
 
-        self.account_id = self.LoadAccountFromDB(account_name)
+        self.account_id = self.load_account_from_db(account_name)
         return self.account_id, None
 
     # Update account balance by an amount (new balance = current balance + amount)
-    def AdjustAccountBalance(self, amount: float, retries_limit: int=3):
+    def adjust_account_balance(self, amount: float, retries_limit: int=3):
         success = False
         retries = 0
 
         while not success and retries < retries_limit:
-            success = db.UpdateAccountBalance(self.account.account_id, amount)
+            success = db.update_account_balance(self.account.account_id, amount)
             retries += 1
 
         return success

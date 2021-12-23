@@ -12,25 +12,25 @@ class ETLManager:
 
     def __init__(self, team_ratings: dict=None) -> None:
         if team_ratings is None:
-            team_ratings = db.GetTeamRatings()
+            team_ratings = db.get_team_ratings()
         self.team_ratings = team_ratings
 
-    def ExtractTransformLoad(self, start_date: str, end_date: str, retries_limit: int=10) -> bool:
+    def extract_transform_load(self, start_date: str, end_date: str, retries_limit: int=10) -> bool:
         success = False
         
         try:
-            raw_game_data = self.ExtractGameData(start_date, end_date, retries_limit)
+            raw_game_data = self.extract_game_data(start_date, end_date, retries_limit)
             if raw_game_data is not None:
-                transformed_game_data = self.TransformGameData(raw_game_data)
-                success = self.LoadGameData(transformed_game_data)
+                transformed_game_data = self.transform_game_data(raw_game_data)
+                success = self.load_game_data(transformed_game_data)
         except Exception as error:
-            print(f"Exception in ExtractTransformLoad... {error}")
+            print(f"Exception in extract_transform_load... {error}")
             raise Exception(error)
 
         return success
 
     # Extract game data within date range
-    def ExtractGameData(self, start_date: str, end_date: str, retries_limit: int=10) -> DataFrame:
+    def extract_game_data(self, start_date: str, end_date: str, retries_limit: int=10) -> DataFrame:
         retrieved = False
         retries = 0
 
@@ -46,7 +46,7 @@ class ETLManager:
         return raw_game_data
 
     # Takes raw game data, transforms the information with updated team ratings and stores in a list
-    def TransformGameData(self, raw_game_data: DataFrame) -> list:
+    def transform_game_data(self, raw_game_data: DataFrame) -> list:
         transformed_game_data = []
         
         for index in range(len(raw_game_data)):
@@ -60,30 +60,30 @@ class ETLManager:
                         int(raw_game_data['away_score'][index]),
                         raw_game_data['status'][index])
 
-            game_data = self.InitializeGameData(game)
+            game_data = self.initialize_game_data(game)
             if game_data != None:
                 transformed_game_data.append(game_data)
         
         return transformed_game_data
 
     # Update team ratings and insert transformed game data
-    def LoadGameData(self, game_data: list) -> bool:
+    def load_game_data(self, game_data: list) -> bool:
         print(f"[ETLManager] Loading {len(game_data)} games")
-        success = db.UpdateTeamRatings(self.team_ratings)
-        success &= db.InsertGameData(game_data)
+        success = db.update_team_ratings(self.team_ratings)
+        success &= db.insert_game_data(game_data)
         return success
 
-    def InitializeGameData(self, game: Game) -> list:
-        if self.IsGameValid(game):
-            game.CalculateELO(self.team_ratings[game.home_team], self.team_ratings[game.away_team])
+    def initialize_game_data(self, game: Game) -> list:
+        if self.is_game_valid(game):
+            game.calculate_elo(self.team_ratings[game.home_team], self.team_ratings[game.away_team])
             self.team_ratings[game.home_team], self.team_ratings[game.away_team] = game.home_end_rating, game.away_end_rating
-            return game.GetGameInformation()
+            return game.get_game_information()
     
-    def IsGameValid(self, game: Game) -> bool:
-        return self.IsGameTypeValid(game) and self.AreTeamsValid(game)
+    def is_game_valid(self, game: Game) -> bool:
+        return self.is_game_type_valid(game) and self.are_teams_valid(game)
 
-    def IsGameTypeValid(self, game: Game) -> bool:
+    def is_game_type_valid(self, game: Game) -> bool:
         return GameType(game.game_type) in valid_game_types
 
-    def AreTeamsValid(self, game: Game) -> bool:
+    def are_teams_valid(self, game: Game) -> bool:
         return (game.home_team in self.team_ratings and game.away_team in self.team_ratings)
