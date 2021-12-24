@@ -1,7 +1,7 @@
 import psycopg2
 import threading
 
-from config import config
+from .config import config
 
 db_lock = threading.Lock()
 

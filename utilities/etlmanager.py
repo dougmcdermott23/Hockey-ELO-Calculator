@@ -1,9 +1,9 @@
 import hockey_scraper
 from pandas.core.frame import DataFrame
 
-import dbutils as db
-from constants import GameType
-from game import Game
+from .enums import GameType
+from .classes.game import Game
+from .dbutils import (get_team_ratings, update_team_ratings, insert_game_data)
 
 valid_game_types = [GameType.SEASON_GAME_TYPE]
 
@@ -12,7 +12,7 @@ class ETLManager:
 
     def __init__(self, team_ratings: dict=None) -> None:
         if team_ratings is None:
-            team_ratings = db.get_team_ratings()
+            team_ratings = get_team_ratings()
         self.team_ratings = team_ratings
 
     def extract_transform_load(self, start_date: str, end_date: str, retries_limit: int=10) -> bool:
@@ -69,8 +69,8 @@ class ETLManager:
     # Update team ratings and insert transformed game data
     def load_game_data(self, game_data: list) -> bool:
         print(f"[ETLManager] Loading {len(game_data)} games")
-        success = db.update_team_ratings(self.team_ratings)
-        success &= db.insert_game_data(game_data)
+        success = update_team_ratings(self.team_ratings)
+        success &= insert_game_data(game_data)
         return success
 
     def initialize_game_data(self, game: Game) -> list:

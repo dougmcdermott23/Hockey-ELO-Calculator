@@ -1,9 +1,8 @@
 import sys
-import time
 import threading
 
-from updatescheduler import UpdateScheduler
-from utils import initialize_database
+from utilities.updatescheduler import UpdateScheduler
+from utilities.initialization import initialize_database
 
 def main(argv) -> None:
     initialize_database()

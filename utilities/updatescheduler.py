@@ -2,10 +2,10 @@ from datetime import date, datetime, timedelta
 import schedule
 import time
 
-from config import config
-from etlmanager import ETLManager
-from utils import update_ratings_on_new_season
-import dbutils as db
+from .config import config
+from .dbutils import (get_last_game_date, has_season_update_occurred, get_team_ratings)
+from .etlmanager import ETLManager
+from .initialization import update_ratings_on_new_season
 
 # Break into a base class and derived classes for normal and simulation
 # Or this shouldn't be a class...
@@ -40,7 +40,7 @@ class UpdateScheduler:
 
     # Get the most recent game date in DB and return as string
     def get_last_update_day(self) -> str:
-        last_day = db.get_last_game_date() + timedelta(days=1)
+        last_day = get_last_game_date() + timedelta(days=1)
         return last_day.strftime("%Y-%m-%d")
 
     # Check if season update has occurred. If it hasn't and it is time to update, recalculate team ratings and update
@@ -51,9 +51,9 @@ class UpdateScheduler:
 
         if current_month == reset_month:
             current_year = datetime.strptime(current_date, "%Y-%m-%d").date().year - 1
-            if not db.has_season_update_occurred(current_year):
+            if not has_season_update_occurred(current_year):
                 print("[UpdateScheduler] Recalculating ratings on season end")
-                team_ratings = db.get_team_ratings()
+                team_ratings = get_team_ratings()
                 params = config(section="general")
                 update_ratings_on_new_season(current_year, team_ratings, float(params['standard_rating']), float(params['carry_over']))
 
@@ -66,7 +66,7 @@ class UpdateScheduler:
         last_update_date = self.get_last_update_day()
         self.simulate_current_date = simulate_current_year + "-09-25"
         if last_update_date > self.simulate_current_date:
-            current_date = (db.get_last_game_date() + timedelta(days=2)).strftime("%Y-%m-%d")
+            current_date = (get_last_game_date() + timedelta(days=2)).strftime("%Y-%m-%d")
 
     # Extracts, transforms, and loads all game data from the previous update to now
     def simulate_update_daily_game_data(self) -> None:
