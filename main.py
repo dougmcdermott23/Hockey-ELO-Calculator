@@ -1,18 +1,24 @@
 import sys
 import threading
 
-from utilities.updatescheduler import UpdateScheduler
+from utilities.config import config
 from utilities.initialization import initialize_database
+from utilities.updatescheduler import UpdateScheduler
 
-def main(argv) -> None:
+def main() -> None:
     initialize_database()
 
-    # Start an update thread
-    update_scheduler = UpdateScheduler()
-    update_scheduler_thread = threading.Thread(target=update_scheduler.check_for_pending_updates)
+    params = config(section="general")
+    update_scheduler = UpdateScheduler(params)
+    update_scheduler_thread = threading.Thread(target=update_scheduler.update_scheduler())
     update_scheduler_thread.start()
 
-    process_input()
+    input_thread = threading.Thread(target=process_input())
+    input_thread.start()
+
+    # TODO End threads if necessary and wait before quitting
+    update_scheduler_thread.join()
+    input_thread.join()
 
 def process_input() -> None:
     while True:
@@ -24,4 +30,4 @@ def process_input() -> None:
             print("Trades")
 
 if __name__ == '__main__':
-    main(sys.argv)
+    main()
