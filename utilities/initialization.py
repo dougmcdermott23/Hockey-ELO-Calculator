@@ -10,9 +10,12 @@ def initialize_database() -> None:
     data up to the current date.
     """
     params = config(section="general")
-    if initialize_database_schema():
+    try:
+        initialize_database_schema()
         initialize_team_ratings(float(params['standard_rating']))
         initialize_game_data(params)
+    except Exception as error:
+        print("Error while initializing the database")
 
 def initialize_game_data(params: dict) -> None:
     """Extract, transform, and load all game data for each season a given start year to
@@ -52,9 +55,12 @@ def update_ratings_on_new_season(season_update_id: int,
     """
     recalculate_ratings_on_new_season(team_ratings, standard_rating, carry_over)
     
-    if update_team_ratings(team_ratings):
+    try:
+        update_team_ratings(team_ratings)
         current_date = date.today().strftime("%Y-%m-%d")
         insert_season_update_entry(season_update_id, current_date)
+    except Exception as error:
+        print("Error while updating the team ratings on new season")
 
 def recalculate_ratings_on_new_season(team_ratings: dict,
                                       standard_rating: float,

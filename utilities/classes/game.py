@@ -41,8 +41,9 @@ class Game:
         self.validate_team_name()
         self.parse_game_id()
 
-    # Adjust team abbreviations for franchise changes
     def validate_team_name(self) -> None:
+        """Adjust team abbreviations for consistency.
+        """
         if self.home_team == "PHX":
             self.home_team = "ARI"
 
@@ -55,14 +56,20 @@ class Game:
         if self.away_team == "ATL":
             self.away_team = "WPG"
 
-    # Game ID is in format YYYYTTNNNNNN (Y - Season, T - Game Type, N - Game Number)
     def parse_game_id(self) -> None:
+        """Extract and set values based on the Game ID. Game ID is in the format:
+        YYYYTTNNNNNN (Y - Season, T - Game Type, N - Game Number)
+        """
         game_str = str(self.game_id)
         self.season_id = int(game_str[0:4])
         self.game_type = int(game_str[4:6])
         self.game_number = int(game_str[6:])
 
     def get_game_information(self) -> list:
+        """Put class values in list for database loading.
+
+        Return: list of class values for game object
+        """
         game_information = [
             self.season_id,
             self.game_type,
@@ -83,7 +90,16 @@ class Game:
 
         return game_information
 
-    def calculate_elo(self, home_start_rating: float, away_start_rating: float, K: float=20) -> None:
+    def calculate_elo(self,
+                      home_start_rating: float,
+                      away_start_rating: float,
+                      K: float=20) -> None:
+        """Calculate new team ELO ratings (https://en.wikipedia.org/wiki/Elo_rating_system)
+
+        home_start_rating: Home teams ELO rating before the game
+        away_start_rating: Away teams ELO rating before the game
+        K: K-factor represents the maximum possible adjust per game
+        """
         R_home = home_start_rating
         R_away = away_start_rating
         S_home = 0

@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from enums import ErrorCode
 import dbutils as db
 
 class Account:
@@ -26,8 +25,16 @@ class Account:
         self.account_email: str = None
         self.loaded: bool = False
 
-    # If account exists in database set class fields, else reset class fields to None
     def load_account_from_db(self, account_name: str=None) -> int:
+        """
+        Given an account_name, load the account information from the database and
+        store in the object. If the account does not exist, class fields remain
+        None and return None.
+
+        account_name: String for account name in the database
+
+        return: int representing the account ID from the database
+        """
         if account_name is None:
             account_name = self.account_name
 
@@ -44,27 +51,51 @@ class Account:
         
         return self.account_id
 
-    # Create a new account if one does not already exist with that account name
-    def create_account(self, account_name: str, account_balance: float, account_email: str=""):
+    def create_account(self,
+                       account_name: str,
+                       account_balance: float,
+                       account_email: str="") -> int:
+        """
+        Check if the account already exists in the database. If the account does not exist,
+        create the new account and load to the database.
+
+        account_name: string for the account_name
+        account_balance: float value for the balance of the account
+        account_email: string for the email associated with the account
+
+        return: Account ID from database
+        """
         account_id = self.load_account_from_db(account_name)
         if account_id is not None:
             print(f"[Account] Account with name {self.account_name} already exists")
-            return self.account_id, ErrorCode.ACCOUNT_ALREADY_EXISTS
+            return self.account_id
 
         account_open_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         account_information = (account_name, account_open_datetime, account_balance, account_email)
         db.insert_account(account_information)
 
         self.account_id = self.load_account_from_db(account_name)
-        return self.account_id, None
+        return self.account_id
+        
+    def adjust_account_balance(self,
+                               amount: float,
+                               retries_limit: int=3) -> bool:
+        """Update account balance by an amount (new balance = current balance + amount).
 
-    # Update account balance by an amount (new balance = current balance + amount)
-    def adjust_account_balance(self, amount: float, retries_limit: int=3):
+        amount: float value to adjust account balance by in the database
+        retries_limit: Number of attempts to update account balance in database
+
+        return: bool if operation was a success
+        """
         success = False
         retries = 0
 
         while not success and retries < retries_limit:
-            success = db.update_account_balance(self.account.account_id, amount)
-            retries += 1
+            try:
+                db.update_account_balance(self.account.account_id, amount)
+                success = True
+            except Exception as error:
+                print(f"Error while adjusting account balance... Attempt {retries + 1}")
+                retries += 1
 
         return success

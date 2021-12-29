@@ -27,6 +27,7 @@ def execute_and_fetch_all(command: str, args=None) -> list:
         
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
+        raise error
     finally:
         if conn is not None:
             conn.close()
@@ -55,22 +56,19 @@ def execute_and_fetch_one(command: str, args=None) -> tuple:
         
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
+        raise error
     finally:
         if conn is not None:
             conn.close()
         db_lock.release()
     return result
 
-def execute_one(command: str, args=None) -> bool:
+def execute_one(command: str, args=None) -> None:
     """Execute a SQL command.
 
     command: SQL command string
     args: Parameters for SQL command string
-
-    return: Return if operation was successful
     """
-    success = True
-
     conn = None
     try:
         db_lock.acquire()
@@ -83,25 +81,19 @@ def execute_one(command: str, args=None) -> bool:
             conn.commit()
         
     except (Exception, psycopg2.DatabaseError) as error:
-        success = False
         print(error)
+        raise error
     finally:
         if conn is not None:
             conn.close()
         db_lock.release()
 
-    return success
-
-def execute_many(command: str, args) -> bool:
+def execute_many(command: str, args) -> None:
     """Execute a SQL command against all all parameter sequences.
 
     command: SQL command string
     args: Parameter sequences for SQL command string
-
-    return: Return if operation was successful
     """
-    success = True
-
     conn = None
     try:
         db_lock.acquire()
@@ -115,33 +107,31 @@ def execute_many(command: str, args) -> bool:
         conn.commit()
         
     except (Exception, psycopg2.DatabaseError) as error:
-        success = False
         print(error)
+        raise error
     finally:
         if conn is not None:
             conn.close()
         db_lock.release()
 
-    return success
-
-def initialize_database_schema(sql_file: str = "schema.sql") -> bool:
+def initialize_database_schema(sql_file: str = "schema.sql") -> None:
     """Schema initialization
     """
     sql_file = open(sql_file, "r")
     command = sql_file.read()
-    return execute_one(command)
+    execute_one(command)
 
 """
 TEAM
 """
-def initialize_team_ratings(rating: float) -> bool:
+def initialize_team_ratings(rating: float) -> None:
     """Initialize all team ratings to a value.
     """
     command = f'''UPDATE team 
                   SET current_rating = {rating}'''
-    return execute_one(command)
+    execute_one(command)
 
-def update_team_ratings(team_ratings: dict) -> bool:
+def update_team_ratings(team_ratings: dict) -> None:
     """Update team ratings given a dictionary where the key is the team and value is
     the corresponding rating.
     """
@@ -151,7 +141,7 @@ def update_team_ratings(team_ratings: dict) -> bool:
     args = []
     for team, rating in team_ratings.items():
         args.append([rating, team])
-    return execute_many(command, args)
+    execute_many(command, args)
 
 def get_team_ratings() -> dict:
     """Return a dictionary where the key is the team and value is the corresponding
@@ -212,13 +202,13 @@ def has_season_update_occurred(season_update_id: int) -> bool:
                                        WHERE season_update_id = \'{season_update_id}\'''')
     return result is not None and len(result) > 0
 
-def insert_season_update_entry(season_update_id: int, update_date: str) -> bool:
+def insert_season_update_entry(season_update_id: int, update_date: str) -> None:
     """Insert a season ID and update date to the database and return if success.
     """
     command = '''INSERT INTO season_update (season_update_id, update_date)
                  VALUES (%s, %s)'''
     args = (season_update_id, update_date)
-    return execute_one(command, args)
+    execute_one(command, args)
 
 """
 GAME
@@ -230,7 +220,7 @@ def get_last_game_date() -> str:
                                        FROM game''')
     return result[0] if result is not None else None
 
-def insert_game_data(game_data: list) -> bool:
+def insert_game_data(game_data: list) -> None:
     """Insert a list of games into the database.
     """
     command = '''INSERT INTO game (season_id, game_type, game_number, 
@@ -239,7 +229,7 @@ def insert_game_data(game_data: list) -> bool:
                                    away_score, game_status, home_rating_start, 
                                    home_rating_end, away_rating_start, away_rating_end) 
                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
-    return execute_many(command, game_data)
+    execute_many(command, game_data)
 
 """
 ACCOUNT
@@ -263,32 +253,32 @@ def get_account_information_from_account_name(account_name: str) -> dict:
     }
     return account_information
 
-def insert_account(account_information: tuple) -> bool:
+def insert_account(account_information: tuple) -> None:
     """Insert an account into the database.
     """
     command = '''INSERT INTO account (account_name, account_open_datetime, 
                                       account_balance, account_email)
                  VALUES (%s, %s, %s, %s)'''
-    return execute_one(command, account_information)
+    execute_one(command, account_information)
 
-def update_account_balance(account_id: int, amount: float) -> bool:
+def update_account_balance(account_id: int, amount: float) -> None:
     """Update an accounts balance.
     """
     command = f'''UPDATE account 
                   SET account_balance = account_balance + {amount} 
                   WHERE account_id = {account_id}'''
-    return execute_one(command)
+    execute_one(command)
 
 """
 TRADE
 """
-def insert_trade(trade_information: tuple) -> bool:
+def insert_trade(trade_information: tuple) -> None:
     """Insert a trade into the database.
     """
     command = '''INSERT INTO trade (account_id, team_id, 
                                     trade_quantity, trade_datetime)
                  VALUES (%s, %s, %s, %s)'''
-    return execute_one(command, trade_information)
+    execute_one(command, trade_information)
 
 def get_account_holdings_for_team(account_id: int, team_id: int) -> float:
     """Return the account holdings for a given account ID and team ID pair.
