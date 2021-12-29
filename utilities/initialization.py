@@ -4,6 +4,7 @@ from .config import config
 from .dbutils import (initialize_database_schema, initialize_team_ratings,
                      get_team_ratings, update_team_ratings, insert_season_update_entry)
 from .etlmanager import extract_transform_load
+from .logging.logger import LogManager
 
 def initialize_database() -> None:
     """Initialize the database schema if required. update the team ratings and game

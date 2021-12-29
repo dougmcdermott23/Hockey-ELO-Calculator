@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from enums import LogSeverity
+from .enums import LogSeverity
 
 class LogMessage(ABC):
     @abstractmethod
