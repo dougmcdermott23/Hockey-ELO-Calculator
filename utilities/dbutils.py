@@ -26,7 +26,6 @@ def execute_and_fetch_all(command: str, args=None) -> list:
             result = cur.fetchall()
         
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
         raise error
     finally:
         if conn is not None:
@@ -55,7 +54,6 @@ def execute_and_fetch_one(command: str, args=None) -> tuple:
             result = cur.fetchone()
         
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
         raise error
     finally:
         if conn is not None:
@@ -81,7 +79,6 @@ def execute_one(command: str, args=None) -> None:
             conn.commit()
         
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
         raise error
     finally:
         if conn is not None:
@@ -107,7 +104,6 @@ def execute_many(command: str, args) -> None:
         conn.commit()
         
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
         raise error
     finally:
         if conn is not None:

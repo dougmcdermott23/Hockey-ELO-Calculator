@@ -4,6 +4,7 @@ from pandas.core.frame import DataFrame
 from .enums import GameType
 from .classes.game import Game
 from .dbutils import (get_team_ratings, update_team_ratings, insert_game_data)
+from .logging.logger import LogManager
 
 valid_game_types = [GameType.SEASON_GAME_TYPE]
 
@@ -32,7 +33,7 @@ def extract_transform_load(start_date: str,
             load_game_data(team_ratings, transformed_game_data)
             return len(transformed_game_data)
     except Exception as error:
-        print(f"Exception in extract_transform_load... {error}")
+        LogManager.write_log(f"Exception in extract_transform_load... {error}")
         raise Exception(error)
 
 def extract_game_data(start_date: str,
@@ -57,7 +58,7 @@ def extract_game_data(start_date: str,
             retrieved = True
         except Exception as error:
             retries += 1
-            print(f"Exception while retrieving data, trying again... {error}")
+            LogManager.write_log(f"Exception while retrieving data, trying again... {error}")
 
     return raw_game_data
 
@@ -97,7 +98,7 @@ def load_game_data(team_ratings: dict, game_data: list) -> None:
 
     return: bool saying if the load was successful
     """
-    print(f"[ETLManager] Loading {len(game_data)} games")
+    LogManager.write_log(f"[ETLManager] Loading {len(game_data)} games")
     update_team_ratings(team_ratings)
     insert_game_data(game_data)
 

@@ -1,5 +1,7 @@
 import logging
+import os
 
+from datetime import datetime
 from multiprocessing import Process, Queue
 from pathlib import Path
 from typing import Any
@@ -27,14 +29,26 @@ class LogManager:
             LogManager()
         return LogManager.__instance
 
+    @staticmethod
+    def write_log(log_message: Any) -> None:
+        instance = LogManager.get_instance()
+        instance.logger_queue.put(log_message)
+
+    @staticmethod
+    def close_log() -> None:
+        instance = LogManager.get_instance()
+        if instance.logger_process is not None:
+            instance.logger_queue.put(TERMINATE_MESSAGE)
+            instance.logger_process.join()
+
     def __init__(self):
         if LogManager.__instance is not None:
             raise Exception("This class is a singleton, use get_instance to get an instance of this class.")
         else:
             params = config(section="logging")
 
-            self.logging_enabled = params['logging_enabled'] == "True" or params['logging_enabled'] == "true"
             self.log_file_path = Path(params['log_file_path'], params['log_file_name']).with_suffix('.log')
+            self.logging_enabled = os.path.isfile(self.log_file_path)
             self.logger_name = params['logger_name']
             self.logger_level = logging._nameToLevel[params['logger_level']]
             self.logger_format = '%(message)s'
@@ -69,12 +83,6 @@ class LogManager:
                 if input == TERMINATE_MESSAGE:
                     break
                 else:
-                    self.logger.info(input)
-
-    def log_message(self, log_message: Any) -> None:
-        self.logger_queue.put(log_message)
-
-    def close_log(self) -> None:
-        if self.logger_process is not None:
-            self.logger_queue.put(TERMINATE_MESSAGE)
-            self.logger_process.join()
+                    date_time = datetime.today().strftime("%Y-%m-%d %H:%M:%S")
+                    message = f"<{date_time}> {input}"
+                    self.logger.info(message)

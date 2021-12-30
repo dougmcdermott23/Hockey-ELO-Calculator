@@ -11,26 +11,23 @@ def main() -> None:
 
     params = config(section="general")
     update_scheduler = UpdateScheduler(params)
-    update_scheduler_thread = threading.Thread(target=update_scheduler.update_scheduler())
-    update_scheduler_thread.start()
 
-    input_thread = threading.Thread(target=process_input())
+    input_thread = threading.Thread(target=process_input(), name="input_thread")
     input_thread.start()
 
     # TODO End threads if necessary and wait before quitting
-    update_scheduler_thread.join()
     input_thread.join()
+    update_scheduler.close_update_scheduler()
 
-    logger.close_log()
+    LogManager.close_log()
 
 def process_input() -> None:
-    while True:
-        val = input("Enter 1 to access accounts, enter 2 to create a trade: ")
+    stopped = False
+    while not stopped:
+        val = input("Enter 0 to exit: ")
 
-        if val == "1":
-            logger.log_message("Accounts")
-        if val == "2":
-            logger.log_message("Trades")
+        if val == "0":
+            stopped = True
 
 if __name__ == '__main__':
     main()

@@ -16,7 +16,7 @@ def initialize_database() -> None:
         initialize_team_ratings(float(params['standard_rating']))
         initialize_game_data(params)
     except Exception as error:
-        print("Error while initializing the database")
+        LogManager.write_log(f"Error while initializing the database: {error}")
 
 def initialize_game_data(params: dict) -> None:
     """Extract, transform, and load all game data for each season a given start year to
@@ -61,7 +61,7 @@ def update_ratings_on_new_season(season_update_id: int,
         current_date = date.today().strftime("%Y-%m-%d")
         insert_season_update_entry(season_update_id, current_date)
     except Exception as error:
-        print("Error while updating the team ratings on new season")
+        LogManager.write_log(f"Error while updating the team ratings on new season: {error}")
 
 def recalculate_ratings_on_new_season(team_ratings: dict,
                                       standard_rating: float,

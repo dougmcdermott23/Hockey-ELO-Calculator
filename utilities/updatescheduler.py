@@ -1,12 +1,15 @@
+import threading
 import schedule
 import time
 
 from datetime import date, datetime, timedelta
 from schedule import Job
+from threading import Thread, Event
 
 from .dbutils import (get_last_game_date, has_season_update_occurred, get_team_ratings)
 from .etlmanager import extract_transform_load
 from .initialization import update_ratings_on_new_season
+from .logging.logger import LogManager
 
 # TODO: resolve the inf while loop in update_scheduler
 
@@ -22,6 +25,9 @@ class UpdateScheduler:
     standard_rating: float
     carry_over: float
 
+    update_thread_event: Event
+    update_thread: Thread
+
     def __init__(self, params: dict) -> None:
         """Daily updates"""
         self.simulate: bool = params["simulate"]
@@ -36,21 +42,31 @@ class UpdateScheduler:
         self.standard_rating = float(params['standard_rating'])
         self.carry_over = float(params['carry_over'])
 
+        self.update_thread_event = Event()
+        self.update_thread = Thread(target=self.update_scheduler, name="update_scheduler_thread")
+        self.update_thread.start()
+
     def update_scheduler(self) -> None:
         """Initialize update schedule and periodically check if an update is ready.
         """
         self.update_schedule.do(self.update_daily_game_data)
 
-        while True:
+        while not self.update_thread_event.is_set():
             schedule.run_pending()
-            time.sleep(self.pending_check_interval_sec)
+            self.update_thread_event.wait(self.pending_check_interval_sec)
+
+    def close_update_scheduler(self) -> None:
+        """Set event to close the update scheduler thread and wait.
+        """
+        self.update_thread_event.set()
+        self.update_thread.join()
 
     def update_daily_game_data(self) -> None:
         """Get the start and end date for the ETL process. Perform the ETL process and
         then check if an end of season update is required.
         """
-        print("[UpdateScheduler] Starting Daily Game Update")
         start_date, end_date = self.get_update_dates()
+        LogManager.write_log(f"[UpdateScheduler] Starting Daily Game Update from {start_date} to {end_date}")
 
         num_games = extract_transform_load(start_date=start_date, end_date=end_date)
 
@@ -58,7 +74,7 @@ class UpdateScheduler:
             self.simulate_offset = 1
         
         self.check_season_end_update(end_date)
-        print("[UpdateScheduler] Finished Daily Game Update")
+        LogManager.write_log("[UpdateScheduler] Finished Daily Game Update")
 
     def get_update_dates(self) -> None:
         """Query the database are return the start and end date for data extraction. The
@@ -95,7 +111,7 @@ class UpdateScheduler:
         if current_month == self.reset_month:
             current_year = datetime.strptime(date, "%Y-%m-%d").date().year - 1
             if not has_season_update_occurred(current_year):
-                print("[UpdateScheduler] Recalculating ratings on season end")
+                LogManager.write_log("[UpdateScheduler] Recalculating ratings on season end")
                 team_ratings = get_team_ratings()
                 update_ratings_on_new_season(season_update_id=current_year,
                                              team_ratings=team_ratings,
